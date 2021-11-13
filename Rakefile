@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rake_circle_ci'
-require 'rake_docker'
 require 'rake_github'
 require 'rake_gpg'
 require 'rake_leiningen'
