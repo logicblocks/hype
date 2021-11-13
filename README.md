@@ -1,5 +1,9 @@
 # hype
 
+[![Clojars Project](https://img.shields.io/clojars/v/io.logicblocks/hype.svg)](https://clojars.org/io.logicblocks/hype)
+[![Clojars Downloads](https://img.shields.io/clojars/dt/io.logicblocks/hype.svg)](https://clojars.org/io.logicblocks/hype)
+[![GitHub Contributors](https://img.shields.io/github/contributors-anon/logicblocks/hype.svg)](https://github.com/logicblocks/hype/graphs/contributors)
+
 Hypermedia functions for `bidi` and `ring`.
 
 ## Install
