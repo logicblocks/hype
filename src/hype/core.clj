@@ -7,11 +7,11 @@
     - including template parameters, and
     - converting between paths and URLs."
   (:require
-    [clojure.string :as string]
+   [clojure.string :as string]
 
-    [bidi.bidi :refer [path-for]]
-    [ring.util.codec :as codec]
-    [camel-snake-kebab.core :as csk]))
+   [bidi.bidi :refer [path-for]]
+   [ring.util.codec :as codec]
+   [camel-snake-kebab.core :as csk]))
 
 (defn- query-string-for
   [parameters {:keys [key-fn]
@@ -145,21 +145,21 @@
             query-template-params       []
             query-template-param-key-fn csk/->camelCaseString}
      :as   params}]
-    (str
-      (apply path-for routes handler
-        (mapcat seq
-          (merge
-            (path-template-params-for
-              path-template-params
-              {:key-fn path-template-param-key-fn})
-            path-params)))
-      (query-string-for
-        query-params
-        {:key-fn query-param-key-fn})
-      (query-template-for
-        query-template-params
-        {:expansion-character (if (empty? query-params) "?" "&")
-         :key-fn              query-template-param-key-fn}))))
+   (str
+     (apply path-for routes handler
+       (mapcat seq
+         (merge
+           (path-template-params-for
+             path-template-params
+             {:key-fn path-template-param-key-fn})
+           path-params)))
+     (query-string-for
+       query-params
+       {:key-fn query-param-key-fn})
+     (query-template-for
+       query-template-params
+       {:expansion-character (if (empty? query-params) "?" "&")
+        :key-fn              query-template-param-key-fn}))))
 
 (defn absolute-url-for
   "Builds an absolute URL for `handler` based on `request`, `routes` and
@@ -232,5 +232,5 @@
       ; => \"https://localhost:8080/articles/index.html?latest=true&sort-direction=descending{&per-page,page}\""
   ([request routes handler] (absolute-url-for request routes handler {}))
   ([request routes handler params]
-    (absolute-path->absolute-url
-      request (absolute-path-for routes handler params))))
+   (absolute-path->absolute-url
+     request (absolute-path-for routes handler params))))

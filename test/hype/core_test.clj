@@ -1,12 +1,12 @@
 (ns hype.core-test
   (:require
-    [clojure.test :refer :all]
+   [clojure.test :refer :all]
 
-    [ring.mock.request :as ring]
+   [ring.mock.request :as ring]
 
-    [camel-snake-kebab.core :as csk]
+   [camel-snake-kebab.core :as csk]
 
-    [hype.core :as hype]))
+   [hype.core :as hype]))
 
 (deftest base-url-for
   (testing "returns the domain name for a URL"
