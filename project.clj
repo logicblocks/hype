@@ -1,6 +1,6 @@
-(defproject b-social/hype "1.0.1-SNAPSHOT"
+(defproject io.logicblocks/hype "1.1.0-RC1"
   :description "Hypermedia functions for bidi and ring."
-  :url "https://github.com/b-social/hype"
+  :url "https://github.com/logicblocks/hype"
 
   :license {:name "The MIT License"
             :url  "https://opensource.org/licenses/MIT"}
@@ -35,7 +35,7 @@
    :metadata    {:doc/format :markdown}
    :output-path "docs"
    :doc-paths   ["docs"]
-   :source-uri  "https://github.com/b-social/hype/blob/{version}/{filepath}#L{line}"}
+   :source-uri  "https://github.com/logicblocks/hype/blob/{version}/{filepath}#L{line}"}
 
   :cljfmt {:indents ^:replace {#".*" [[:inner 0]]}}
 

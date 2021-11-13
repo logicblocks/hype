@@ -7,12 +7,12 @@ Hypermedia functions for `bidi` and `ring`.
 Add the following to your `project.clj` file:
 
 ```clj
-[b-social/hype "1.0.0"]
+[io.logicblocks/hype "1.1.0"]
 ```
 
 ## Documentation
 
-* [API Docs](http://b-social.github.io/hype)
+* [API Docs](http://logicblocks.github.io/hype)
 
 ## Usage
 
@@ -82,12 +82,12 @@ For example:
 ; => "https://localhost:8080/articles"
 ```
 
-See the [Getting Started](https://b-social.github.io/hype/getting-started.html) 
+See the [Getting Started](https://logicblocks.github.io/hype/getting-started.html) 
 guide for more details.
 
 ## License
 
-Copyright © 2018 B-Social Ltd.
+Copyright &copy; 2021 LogicBlocks Maintainers
 
 Distributed under the terms of the 
 [MIT License](http://opensource.org/licenses/MIT).
