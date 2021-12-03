@@ -137,7 +137,18 @@
       (is (= "/examples/{exampleId}/subexamples/{subExampleId}"
             (hype/absolute-path-for routes :sub-example
               {:path-template-params {:example-id     :example-id
-                                      :sub-example-id :sub-example-id}}))))))
+                                      :sub-example-id :sub-example-id}})))))
+  (testing "reitit routing"
+    (with-bindings
+     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      (let [router (reitit/router
+                     [["/" :root]
+                      [["/examples/:example-id" :example
+                        ["/subexamples/:sub-example-id" :sub-example]]]])]
+        (is (= "/examples/{exampleId}/subexamples/{subExampleId}"
+              (hype/absolute-path-for router :sub-example
+                {:path-template-params {:example-id     :example-id
+                                        :sub-example-id :sub-example-id}})))))))
 
 (deftest absolute-path-for
   (testing "uses provided query parameter key function when supplied"
