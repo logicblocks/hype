@@ -3,4 +3,6 @@ TODO
 
 * Add more absolute <-> relative {path,URL} converters.
 * Add support for more sophisticated template parameters.
-* Provide switchable router backends.
+* Separate backends into different packages to prevent including multiple 
+  routing dependencies.
+* Introduce intermediate route representation and hype router.

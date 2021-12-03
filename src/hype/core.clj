@@ -7,11 +7,49 @@
     - including template parameters, and
     - converting between paths and URLs."
   (:require
-   [clojure.string :as string]
+    [clojure.string :as string]
 
-   [bidi.bidi :refer [path-for]]
-   [ring.util.codec :as codec]
-   [camel-snake-kebab.core :as csk]))
+    [bidi.bidi :as bidi]
+    [reitit.core :as reitit-core]
+    [reitit.impl :as reitit-impl]
+
+    [ring.util.codec :as codec]
+    [camel-snake-kebab.core :as csk])
+  (:import
+    [clojure.lang PersistentVector]
+    [reitit.core Router]))
+
+(defprotocol Backend
+  (path-for [_ route-name parameters]))
+
+(defrecord BidiBackend [routing-context]
+  Backend
+  (path-for [_ route-name parameters]
+    (apply bidi/path-for routing-context route-name
+      (mapcat seq parameters))))
+
+(defrecord ReititBackend [routing-context]
+  Backend
+  (path-for [_ route-name parameters]
+    (let [match (reitit-core/match-by-name
+                  routing-context route-name parameters)
+          template (:template match)
+          options (reitit-core/options routing-context)
+          route (reitit-impl/parse template options)]
+      (reitit-impl/path-for route parameters))))
+
+(defprotocol BackendFactory
+  (backend-for [thing]))
+
+(extend-type Router
+  BackendFactory
+  (backend-for [routing-context]
+    (->ReititBackend routing-context)))
+
+(extend-type PersistentVector
+  BackendFactory
+  (backend-for [routing-context]
+    (->BidiBackend routing-context)))
 
 (defn- query-string-for
   [parameters {:keys [key-fn]
@@ -66,8 +104,8 @@
 (defn absolute-path-for
   "Builds an absolute path for `handler` based on `routes` and `params` where:
 
-    - `handler` is a keyword identifying the handler for which to build a path,
     - `routes` is a bidi routes data structure,
+    - `handler` is a keyword identifying the handler for which to build a path,
     - `params` is an optional map which optionally includes any of:
       - `path-params`: parameters defined in the bidi routes as route patterns,
         specified as a map,
@@ -129,7 +167,7 @@
          :query-template-param-key-fn clojure.core/identity})
       ; => \"/articles/index.html?latest=true&sort-direction=descending{&per-page,page}\""
   ([routes handler] (absolute-path-for routes handler {}))
-  ([routes handler
+  ([routes-or-router handler
     {:keys [path-params
             path-template-params
             path-template-param-key-fn
@@ -146,13 +184,12 @@
             query-template-param-key-fn csk/->camelCaseString}
      :as   params}]
    (str
-     (apply path-for routes handler
-       (mapcat seq
-         (merge
-           (path-template-params-for
-             path-template-params
-             {:key-fn path-template-param-key-fn})
-           path-params)))
+     (path-for (backend-for routes-or-router) handler
+       (merge
+         (path-template-params-for
+           path-template-params
+           {:key-fn path-template-param-key-fn})
+         path-params))
      (query-string-for
        query-params
        {:key-fn query-param-key-fn})
@@ -160,6 +197,8 @@
        query-template-params
        {:expansion-character (if (empty? query-params) "?" "&")
         :key-fn              query-template-param-key-fn}))))
+
+(mapcat seq {:first 1 :second 2})
 
 (defn absolute-url-for
   "Builds an absolute URL for `handler` based on `request`, `routes` and
