@@ -11,6 +11,7 @@
 
    [bidi.bidi :as bidi]
    [reitit.core :as reitit]
+   [reitit.impl :as reitit-impl]
 
    [ring.util.codec :as codec]
    [camel-snake-kebab.core :as csk]))
@@ -28,8 +29,9 @@
   Backend
   (path-for [_ routing-context route-name parameters]
     (let [match (reitit/match-by-name
-                  routing-context route-name parameters)]
-      (reitit/match->path match))))
+                  routing-context route-name parameters)
+          route (reitit-impl/parse (:template match) (reitit/options routing-context))]
+      (reitit-impl/path-for route parameters))))
 
 (def ^:dynamic *backend* (->BidiBackend))
 
