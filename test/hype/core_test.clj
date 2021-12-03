@@ -6,11 +6,13 @@
 
    [camel-snake-kebab.core :as csk]
 
-   [hype.core :as hype]))
+   [hype.core :as hype]
 
-(require '[reitit.core :as reitit])
-(require '[reitit.impl :as impl])
-(require '[clojure.pprint :as pprint])
+   [reitit.core :as reitit]
+
+   [reitit.impl :as impl]
+
+   [clojure.pprint :as pprint]))
 
 (def router
   (reitit/router
@@ -36,8 +38,6 @@
 
 (pprint/pprint match)
 
-
-
 (reitit/match-by-path
   router "/api/ping")
 (reitit/match-by-path
@@ -61,7 +61,7 @@
 
   (testing "reitit routing"
     (with-bindings
-     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      {#'hype.core/*backend* (hype.core/->ReititBackend)}
       (let [router (reitit/router
                      [["/" :root]
                       ["/examples" :examples]])]
@@ -79,7 +79,7 @@
 
   (testing "reitit routing"
     (with-bindings
-     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      {#'hype.core/*backend* (hype.core/->ReititBackend)}
       (let [router (reitit/router
                      [["/" :root]
                       ["/examples/:example-id" :example]])]
@@ -99,7 +99,7 @@
 
   (testing "reitit routing"
     (with-bindings
-     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      {#'hype.core/*backend* (hype.core/->ReititBackend)}
       (let [router (reitit/router
                      [["/" :root]
                       ["/examples/:example-id/thing/:thing-id" :example]])]
@@ -119,7 +119,7 @@
 
   (testing "reitit routing"
     (with-bindings
-     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      {#'hype.core/*backend* (hype.core/->ReititBackend)}
       (let [router (reitit/router
                      [["/" :root]
                       ["/examples/:example-id" :example]])]
@@ -140,7 +140,7 @@
                                       :sub-example-id :sub-example-id}})))))
   (testing "reitit routing"
     (with-bindings
-     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      {#'hype.core/*backend* (hype.core/->ReititBackend)}
       (let [router (reitit/router
                      [["/" :root]
                       [["/examples/:example-id" :example
