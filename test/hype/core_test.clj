@@ -152,16 +152,29 @@
 
 (deftest absolute-path-for
   (testing "uses provided query parameter key function when supplied"
-    (let [routes [""
-                  [["/" :root]
-                   [["/examples/" :example-id]
-                    [["" :example]
-                     [["/subexamples/" :sub-example-id] :sub-example]]]]]]
-      (is (= "/examples/{example_id}/subexamples/{sub_example_id}"
-            (hype/absolute-path-for routes :sub-example
-              {:path-template-params       {:example-id     :example-id
-                                            :sub-example-id :sub-example-id}
-               :path-template-param-key-fn csk/->snake_case_string})))))
+    (testing "bidi routing"
+      (let [routes [""
+                    [["/" :root]
+                     [["/examples/" :example-id]
+                      [["" :example]
+                       [["/subexamples/" :sub-example-id] :sub-example]]]]]]
+        (is (= "/examples/{example_id}/subexamples/{sub_example_id}"
+               (hype/absolute-path-for routes :sub-example
+                                       {:path-template-params       {:example-id     :example-id
+                                                                     :sub-example-id :sub-example-id}
+                                        :path-template-param-key-fn csk/->snake_case_string})))))
+    (testing "reitit routing"
+      (with-bindings
+        {#'hype.core/*backend* (hype.core/->ReititBackend)}
+        (let [router (reitit/router
+                       [["/" :root]
+                        [["/examples/:example-id" :example
+                          ["/subexamples/:sub-example-id" :sub-example]]]])]
+          (is (= "/examples/{example_id}/subexamples/{sub_example_id}"
+                 (hype/absolute-path-for router :sub-example
+                                         {:path-template-params       {:example-id     :example-id
+                                                                       :sub-example-id :sub-example-id}
+                                          :path-template-param-key-fn csk/->snake_case_string})))))))
 
   (testing "expands query parameter"
     (let [routes [""
