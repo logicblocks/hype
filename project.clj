@@ -17,7 +17,7 @@
             [lein-bikeshed "0.5.2"]
             [jonase/eastwood "0.3.11"]]
 
-  :dependencies [[camel-snake-kebab "0.4.0"]
+  :dependencies [[camel-snake-kebab "0.4.2"]
                  [bidi "2.1.6"]
                  [metosin/reitit "0.5.15"]]
 

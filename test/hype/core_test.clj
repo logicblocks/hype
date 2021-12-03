@@ -8,25 +8,68 @@
 
    [hype.core :as hype]))
 
-(deftest base-url-for
-  (testing "returns the domain name for a URL"
-    (is (= "https://example.com"
-          (hype/base-url-for
-            (ring/request "GET" "https://example.com/some/thing"))))
+(require '[reitit.core :as reitit])
+(require '[reitit.impl :as impl])
+(require '[clojure.pprint :as pprint])
 
-    (is (= "http://another.example.com"
-          (hype/base-url-for
-            (ring/request "GET" "http://another.example.com/some/thing"))))))
+(def router
+  (reitit/router
+    [["/api/orders/:order-id/items/:item-id" :order-item]]))
 
-(deftest absolute-path-for
-  (testing "returns the absolute path for a route"
+(def path-params
+  {:order-id "123"
+   :item-id  "{id}"})
+
+(def match
+  (reitit/match-by-name
+    router :order-item path-params))
+
+(def template (:template match))
+
+(def route (impl/parse template (reitit/options router)))
+
+(impl/path-for route path-params)
+
+(reitit/match->path match)
+
+(reitit/match-by-name router :order)
+
+(pprint/pprint match)
+
+
+
+(reitit/match-by-path
+  router "/api/ping")
+(reitit/match-by-path
+  router "/api/orders/%7Bid%7D")
+
+(deftest base-url-for-returns-the-domain-name-for-a-url
+  (is (= "https://example.com"
+        (hype/base-url-for
+          (ring/request "GET" "https://example.com/some/thing"))))
+  (is (= "http://another.example.com"
+        (hype/base-url-for
+          (ring/request "GET" "http://another.example.com/some/thing")))))
+
+(deftest absolute-path-for-returns-the-absolute-path-for-a-route
+  (testing "bidi routing"
     (let [routes [""
                   [["/" :root]
                    ["/examples" :examples]]]]
       (is (= "/examples"
             (hype/absolute-path-for routes :examples)))))
 
-  (testing "expands path parameter"
+  (testing "reitit routing"
+    (with-bindings
+     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      (let [router (reitit/router
+                     [["/" :root]
+                      ["/examples" :examples]])]
+        (is (= "/examples"
+              (hype/absolute-path-for router :examples)))))))
+
+(deftest absolute-path-for-expands-a-single-path-parameter
+  (testing "bidi routing"
     (let [routes [""
                   [["/" :root]
                    [["/examples/" :example-id] :example]]]]
@@ -34,7 +77,18 @@
             (hype/absolute-path-for routes :example
               {:path-params {:example-id 123}})))))
 
-  (testing "expands path parameters"
+  (testing "reitit routing"
+    (with-bindings
+     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      (let [router (reitit/router
+                     [["/" :root]
+                      ["/examples/:example-id" :example]])]
+        (is (= "/examples/123"
+              (hype/absolute-path-for router :example
+                {:path-params {:example-id 123}})))))))
+
+(deftest absolute-path-for-expands-multiple-path-parameters
+  (testing "bidi routing"
     (let [routes [""
                   [["/" :root]
                    [["/examples/" :example-id "/thing/" :thing-id] :example]]]]
@@ -43,7 +97,19 @@
               {:path-params {:example-id 123
                              :thing-id   456}})))))
 
-  (testing "expands path template parameter"
+  (testing "reitit routing"
+    (with-bindings
+     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      (let [router (reitit/router
+                     [["/" :root]
+                      ["/examples/:example-id/thing/:thing-id" :example]])]
+        (is (= "/examples/123/thing/456"
+              (hype/absolute-path-for router :example
+                {:path-params {:example-id 123
+                               :thing-id   456}})))))))
+
+(deftest absolute-path-for-expands-a-single-path-template-parameter
+  (testing "bidi routing"
     (let [routes [""
                   [["/" :root]
                    [["/examples/" :example-id] :example]]]]
@@ -51,7 +117,18 @@
             (hype/absolute-path-for routes :example
               {:path-template-params {:example-id :example-id}})))))
 
-  (testing "expands path template parameters"
+  (testing "reitit routing"
+    (with-bindings
+     {#'hype.core/*backend* (hype.core/->ReititBackend)}
+      (let [router (reitit/router
+                     [["/" :root]
+                      ["/examples/:example-id" :example]])]
+        (is (= "/examples/{exampleId}"
+              (hype/absolute-path-for router :example
+                {:path-template-params {:example-id :example-id}})))))))
+
+(deftest absolute-path-for-expands-multiple-path-template-parameters
+  (testing "bidi routing"
     (let [routes [""
                   [["/" :root]
                    [["/examples/" :example-id]
@@ -60,8 +137,9 @@
       (is (= "/examples/{exampleId}/subexamples/{subExampleId}"
             (hype/absolute-path-for routes :sub-example
               {:path-template-params {:example-id     :example-id
-                                      :sub-example-id :sub-example-id}})))))
+                                      :sub-example-id :sub-example-id}}))))))
 
+(deftest absolute-path-for
   (testing "uses provided query parameter key function when supplied"
     (let [routes [""
                   [["/" :root]

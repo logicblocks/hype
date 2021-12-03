@@ -9,9 +9,29 @@
   (:require
    [clojure.string :as string]
 
-   [bidi.bidi :refer [path-for]]
+   [bidi.bidi :as bidi]
+   [reitit.core :as reitit]
+
    [ring.util.codec :as codec]
    [camel-snake-kebab.core :as csk]))
+
+(defprotocol Backend
+  (path-for [_ routing-context route-name parameters]))
+
+(defrecord BidiBackend []
+  Backend
+  (path-for [_ routing-context route-name parameters]
+    (apply bidi/path-for routing-context route-name
+      (mapcat seq parameters))))
+
+(defrecord ReititBackend []
+  Backend
+  (path-for [_ routing-context route-name parameters]
+    (let [match (reitit/match-by-name
+                  routing-context route-name parameters)]
+      (reitit/match->path match))))
+
+(def ^:dynamic *backend* (->BidiBackend))
 
 (defn- query-string-for
   [parameters {:keys [key-fn]
@@ -146,13 +166,12 @@
             query-template-param-key-fn csk/->camelCaseString}
      :as   params}]
    (str
-     (apply path-for routes handler
-       (mapcat seq
-         (merge
-           (path-template-params-for
-             path-template-params
-             {:key-fn path-template-param-key-fn})
-           path-params)))
+     (path-for *backend* routes handler
+       (merge
+         (path-template-params-for
+           path-template-params
+           {:key-fn path-template-param-key-fn})
+         path-params))
      (query-string-for
        query-params
        {:key-fn query-param-key-fn})
@@ -160,6 +179,8 @@
        query-template-params
        {:expansion-character (if (empty? query-params) "?" "&")
         :key-fn              query-template-param-key-fn}))))
+
+(mapcat seq {:first 1 :second 2})
 
 (defn absolute-url-for
   "Builds an absolute URL for `handler` based on `request`, `routes` and
