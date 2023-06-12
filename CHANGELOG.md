@@ -11,6 +11,7 @@ and this project adheres to
 ### Changed
 
 - Forked from b-social/hype.
+- All dependencies have been upgraded to the latest available versions.
 
 ## [1.0.0] — 2019-10-18
 
