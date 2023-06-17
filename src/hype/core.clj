@@ -85,7 +85,7 @@
     {}
     parameter-definitions))
 
-(defn base-url-for
+(defn base-url
   "Returns the URL used to reach the server based on `request`.
 
   The `request` should be a ring request or equivalent. The URL is returned
@@ -102,12 +102,12 @@
   The `request` should be a ring request or equivalent. The URL is returned
   as a string."
   [request absolute-path]
-  (str (base-url-for request) absolute-path))
+  (str (base-url request) absolute-path))
 
 (defn absolute-path-for
   "Builds an absolute path for `route` based on `router` and `params` where:
 
-    - `router` is a `reitit` router or a `bidia routes data structure,
+    - `router` is a `reitit` router or a `bidi` routes data structure,
     - `route` is a keyword identifying the name of the route for which to build
        a path,
     - `params` is an optional map which optionally includes any of:
@@ -132,38 +132,46 @@
 
   Examples:
 
-      (def routes [\"/\" {\"index.html\" :index
-                          \"articles/\" {\"index.html\" :article-index
-                                         [:id \"/article.html\"] :article}}])
+      ;; bidi
+      (def router
+        [\"/\" {\"index.html\" :index
+                \"articles/\" {\"index.html\" :article-index
+                               [:id \"/article.html\"] :article}}])
+      ;; or reitit
+      (def router
+        (reitit/router
+          [[\"/index.html\" :index]
+           [\"/articles/index.html\" :article-index]
+           [\"/articles/:id/article.html\" :article]]))
 
-      (absolute-path-for routes :index)
+      (absolute-path-for router :index)
       ; => \"/index.html\"
 
-      (absolute-path-for routes :article
+      (absolute-path-for router :article
         {:path-params {:id 10}})
       ; => \"/articles/10/article.html\"
 
-      (absolute-path-for routes :article
+      (absolute-path-for router :article
         {:path-template-params {:id :article-id}})
       ; => \"/articles/{articleId}/article.html\"
 
-      (absolute-path-for routes :article
+      (absolute-path-for router :article
         {:path-template-params {:id :articleID}
          :path-template-param-key-fn clojure.core/identity})
       ; => \"/articles/{articleID}/article.html\"
 
-      (absolute-path-for routes :article-index
+      (absolute-path-for router :article-index
         {:query-params {:latest true
                         :sort-direction \"descending\"}
          :query-template-params [:per-page :page]})
       ; => \"/articles/index.html?latest=true&sortDirection=descending{&perPage,page}\"
 
-      (absolute-path-for routes :article
+      (absolute-path-for router :article
         {:path-params {:id 10}
          :query-template-params [:include-author, :include-images]})
       ; => \"/articles/10/article.html{?includeAuthor,includeImages}\"
 
-      (absolute-path-for routes :article-index
+      (absolute-path-for router :article-index
         {:query-params {:latest true
                         :sort-direction \"descending\"}
          :query-param-key-fn clojure.core/identity
@@ -234,45 +242,55 @@
       (require '[ring.mock.request :as ring-mock])
 
       (def request (ring-mock/request \"GET\" \"https://localhost:8080/help\"))
-      (def routes [\"/\" {\"index.html\" :index
-                          \"articles/\" {\"index.html\" :article-index
-                                         [:id \"/article.html\"] :article}}])
 
-      (absolute-url-for request routes :index)
+      ;; bidi
+      (def router
+        [\"/\" {\"index.html\" :index
+                \"articles/\" {\"index.html\" :article-index
+                               [:id \"/article.html\"] :article}}])
+      ;; or reitit
+      (def router
+        (reitit/router
+          [[\"/index.html\" :index]
+           [\"/articles/index.html\" :article-index]
+           [\"/articles/:id/article.html\" :article]]))
+
+      (absolute-url-for request router :index)
       ; => \"https://localhost:8080/index.html\"
 
-      (absolute-url-for request routes :article
+      (absolute-url-for request router :article
         {:path-params {:id 10}})
       ; => \"https://localhost:8080/articles/10/article.html\"
 
-      (absolute-url-for request routes :article
+      (absolute-url-for request router :article
         {:path-template-params {:id :article-id}})
       ; => \"https://localhost:8080/articles/{articleId}/article.html\"
 
-      (absolute-url-for request routes :article
+      (absolute-url-for request router :article
         {:path-template-params {:id :articleID}
          :path-template-param-key-fn clojure.core/identity})
       ; => \"https://localhost:8080/articles/{articleID}/article.html\"
 
-      (absolute-url-for request routes :article-index
+      (absolute-url-for request router :article-index
         {:query-params {:latest true
                         :sort-direction \"descending\"}
          :query-template-params [:per-page :page]})
       ; => \"https://localhost:8080/articles/index.html?latest=true&sortDirection=descending{&perPage,page}\"
 
-      (absolute-url-for request routes :article
+      (absolute-url-for request router :article
         {:path-params {:id 10}
          :query-template-params [:include-author :include-images]})
       ; => \"https://localhost:8080/articles/10/article.html{?includeAuthor,includeImages}\"
 
-      (absolute-url-for request routes :article-index
+      (absolute-url-for request router :article-index
         {:query-params {:latest true
                         :sort-direction \"descending\"}
          :query-param-key-fn clojure.core/identity
          :query-template-params [:per-page :page]
          :query-template-param-key-fn clojure.core/identity})
       ; => \"https://localhost:8080/articles/index.html?latest=true&sort-direction=descending{&per-page,page}\""
-  ([request router route] (absolute-url-for request router route {}))
+  ([request router route]
+   (absolute-url-for request router route {}))
   ([request router route params]
    (absolute-path->absolute-url
      request (absolute-path-for router route params))))

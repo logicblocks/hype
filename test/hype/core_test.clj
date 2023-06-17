@@ -10,10 +10,10 @@
 
 (deftest base-url-for-returns-the-domain-name-for-a-url
   (is (= "https://example.com"
-        (hype/base-url-for
+        (hype/base-url
           (ring/request "GET" "https://example.com/some/thing"))))
   (is (= "http://another.example.com"
-        (hype/base-url-for
+        (hype/base-url
           (ring/request "GET" "http://another.example.com/some/thing")))))
 
 (deftest absolute-path-for-returns-the-absolute-path-for-a-route
@@ -306,7 +306,7 @@
                   [["/" :root]
                    ["/examples" :examples]]]]
       (is (= "https://example.com/examples"
-            (hype/absolute-url-for request routes :examples)))))
+            (hype/absolute-url request routes :examples)))))
 
   (testing "reitit routing"
     (let [request (ring/request "GET" "https://example.com/some/thing")
@@ -314,7 +314,7 @@
                    [["/" :root]
                     ["/examples" :examples]])]
       (is (= "https://example.com/examples"
-            (hype/absolute-url-for request router :examples))))))
+            (hype/absolute-url request router :examples))))))
 
 (deftest absolute-url-for-expands-a-single-path-parameter
   (testing "bidi routing"
@@ -323,7 +323,7 @@
                   [["/" :root]
                    [["/examples/" :example-id] :example]]]]
       (is (= "https://example.com/examples/123"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:path-params {:example-id 123}})))))
 
   (testing "reitit routing"
@@ -332,7 +332,7 @@
                    [["/" :root]
                     ["/examples/:example-id" :example]])]
       (is (= "https://example.com/examples/123"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:path-params {:example-id 123}}))))))
 
 (deftest absolute-url-for-expands-multiple-path-parameters
@@ -342,7 +342,7 @@
                   [["/" :root]
                    [["/examples/" :example-id "/thing/" :thing-id] :example]]]]
       (is (= "https://example.com/examples/123/thing/456"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:path-params {:example-id 123
                              :thing-id   456}})))))
 
@@ -352,7 +352,7 @@
                    [["/" :root]
                     ["/examples/:example-id/thing/:thing-id" :example]])]
       (is (= "https://example.com/examples/123/thing/456"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:path-params {:example-id 123
                              :thing-id   456}}))))))
 
@@ -363,7 +363,7 @@
                   [["/" :root]
                    [["/examples/" :example-id] :example]]]]
       (is (= "https://example.com/examples/{exampleId}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:path-template-params {:example-id :example-id}})))))
 
   (testing "reitit routing"
@@ -372,7 +372,7 @@
                    [["/" :root]
                     ["/examples/:example-id" :example]])]
       (is (= "https://example.com/examples/{exampleId}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:path-template-params {:example-id :example-id}}))))))
 
 (deftest absolute-url-for-expands-multiple-path-template-parameter
@@ -385,7 +385,7 @@
                      [["/subexamples/" :sub-example-id] :sub-example]]]]]]
       (is
         (= "https://example.com/examples/{exampleId}/subexamples/{subExampleId}"
-          (hype/absolute-url-for request routes :sub-example
+          (hype/absolute-url request routes :sub-example
             {:path-template-params {:example-id     :example-id
                                     :sub-example-id :sub-example-id}})))))
 
@@ -398,7 +398,7 @@
                      :sub-example]])]
       (is
         (= "https://example.com/examples/{exampleId}/subexamples/{subExampleId}"
-          (hype/absolute-url-for request router :sub-example
+          (hype/absolute-url request router :sub-example
             {:path-template-params {:example-id     :example-id
                                     :sub-example-id :sub-example-id}}))))))
 
@@ -413,7 +413,7 @@
       (is
         (= (str "https://example.com/examples/{example_id}/subexamples/"
              "{sub_example_id}")
-          (hype/absolute-url-for request routes :sub-example
+          (hype/absolute-url request routes :sub-example
             {:path-template-params       {:example-id     :example-id
                                           :sub-example-id :sub-example-id}
              :path-template-param-key-fn csk/->snake_case_string})))))
@@ -428,7 +428,7 @@
       (is
         (= (str "https://example.com/examples/{example_id}/subexamples/"
              "{sub_example_id}")
-          (hype/absolute-url-for request routes :sub-example
+          (hype/absolute-url request routes :sub-example
             {:path-template-params       {:example-id     :example-id
                                           :sub-example-id :sub-example-id}
              :path-template-param-key-fn csk/->snake_case_string}))))))
@@ -440,7 +440,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples?key=value"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-params {:key "value"}})))))
 
   (testing "reitit routing"
@@ -449,7 +449,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples?key=value"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-params {:key "value"}}))))))
 
 (deftest absolute-url-for-expands-multiple-query-parameters
@@ -459,7 +459,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples?key1=value1&key2=value2"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-params {:key1 "value1"
                               :key2 "value2"}})))))
 
@@ -469,7 +469,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples?key1=value1&key2=value2"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-params {:key1 "value1"
                               :key2 "value2"}}))))))
 
@@ -480,7 +480,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples?perPage=10&sortDirection=descending"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-params {:per-page       10
                               :sort-direction "descending"}})))))
 
@@ -490,7 +490,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples?perPage=10&sortDirection=descending"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-params {:per-page       10
                               :sort-direction "descending"}}))))))
 
@@ -502,7 +502,7 @@
                    ["/examples" :example]]]]
       (is
         (= "https://example.com/examples?per_page=10&sort_direction=descending"
-          (hype/absolute-url-for request routes :example
+          (hype/absolute-url request routes :example
             {:query-params       {:per-page       10
                                   :sort-direction "descending"}
              :query-param-key-fn csk/->snake_case_string})))))
@@ -514,7 +514,7 @@
                     ["/examples" :example]])]
       (is
         (= "https://example.com/examples?per_page=10&sort_direction=descending"
-          (hype/absolute-url-for request router :example
+          (hype/absolute-url request router :example
             {:query-params       {:per-page       10
                                   :sort-direction "descending"}
              :query-param-key-fn csk/->snake_case_string}))))))
@@ -526,7 +526,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples{?key}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-template-params #{:key}})))))
 
   (testing "reitit routing"
@@ -535,7 +535,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples{?key}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-template-params #{:key}}))))))
 
 (deftest absolute-url-for-expands-multiple-query-template-parameter
@@ -545,7 +545,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples{?key1,key2}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-template-params [:key1 :key2]})))))
 
   (testing "reitit routing"
@@ -554,7 +554,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples{?key1,key2}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-template-params [:key1 :key2]}))))))
 
 (deftest
@@ -565,7 +565,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples?key0=value0{&key1,key2}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-params          {:key0 "value0"}
                :query-template-params [:key1 :key2]})))))
 
@@ -575,7 +575,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples?key0=value0{&key1,key2}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-params          {:key0 "value0"}
                :query-template-params [:key1 :key2]}))))))
 
@@ -587,7 +587,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples{?perPage,sortDirection}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-template-params [:per-page :sort-direction]})))))
 
   (testing "reitit routing"
@@ -596,7 +596,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples{?perPage,sortDirection}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-template-params [:per-page :sort-direction]}))))))
 
 (deftest absolute-url-for-uses-query-template-parameter-key-function
@@ -606,7 +606,7 @@
                   [["/" :root]
                    ["/examples" :example]]]]
       (is (= "https://example.com/examples{?per_page,sort_direction}"
-            (hype/absolute-url-for request routes :example
+            (hype/absolute-url request routes :example
               {:query-template-params       [:per-page :sort-direction]
                :query-template-param-key-fn csk/->snake_case_string})))))
 
@@ -616,7 +616,7 @@
                    [["/" :root]
                     ["/examples" :example]])]
       (is (= "https://example.com/examples{?per_page,sort_direction}"
-            (hype/absolute-url-for request router :example
+            (hype/absolute-url request router :example
               {:query-template-params       [:per-page :sort-direction]
                :query-template-param-key-fn csk/->snake_case_string}))))))
 

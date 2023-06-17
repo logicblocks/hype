@@ -7,8 +7,8 @@ and `bidi` routing libraries with extension points allowing others to be
 supported. 
 
 `hype` can build absolute paths (i.e., paths that start from `/`) and
-absolute URLs (i.e., including scheme and host) and provides some facilities
-for converting between the two.
+absolute URLs (i.e., including scheme, host and port etc.) and provides some 
+facilities for converting between the two.
 
 `hype` can build URLs and paths including any or all of:
 
@@ -29,26 +29,39 @@ for converting between the two.
 Given a set of `bidi` routes:
 
 ```clojure
-(def routes 
+(def router 
   [""
    [["/" :index]
     ["/articles" :articles]
     [["/articles/" :article-id] 
      [["" :article]
-      [["/sections/" :article-section-id] :article-section]]]]])
+      [["/sections/" :section-id] :article-section]]]]])
+```
+
+or an equivalent `reitit` router:
+
+```clojure
+(def router
+  (reitit/router
+    [["/" :index]
+     ["/articles"
+      ["" :articles]
+      ["/:article-id"
+       ["" :article]
+       ["/sections/:section-id" :article-section]]]]))
 ```
 
 an absolute path, say for `:articles`, can be generated as follows:
 
 ```clojure
-(hype/absolute-path-for routes :articles)
+(hype/absolute-path-for router :articles)
 ; => "/articles"
 ```
 
 If the route requires a path parameter, such as in the `:article` route above:
 
 ```clojure
-(hype/absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-params {:article-id 26}})
 ; => "/articles/26"
 ```
@@ -56,7 +69,7 @@ If the route requires a path parameter, such as in the `:article` route above:
 To leave the path parameter templated for use in URI templates:
 
 ```clojure
-(hype/absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-template-params {:article-id :article-id}})
 ; => "/articles/{articleId}"
 ```
@@ -65,7 +78,7 @@ Path template parameters are automatically converted to camel case. This
 behaviour can be overridden as follows:
 
 ```clojure
-(hype/absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-template-params {:article-id :articleID}
    :path-template-param-key-fn clojure.core/identity})
 ; => "/articles/{articleID}"
@@ -75,16 +88,16 @@ If the route requires multiple path parameters, such as in the
 `:article-section` route above:
 
 ```clojure
-(hype/absolute-path-for routes :article-section
+(hype/absolute-path-for router :article-section
   {:path-params {:article-id 26
-                 :article-section-id 1}})
+                 :section-id 1}})
 ; => "/articles/26/sections/1
 ```
 
 Query parameters are also supported when generating a path:
 
 ```clojure
-(hype/absolute-path-for routes :articles
+(hype/absolute-path-for router :articles
   {:query-params {:page 2
                   :per-page 10}})
 ; => "/articles?page=2&perPage=10"
@@ -94,7 +107,7 @@ As for path template parameters, query parameter keys are automatically
 converted to camel case. This behaviour can be overridden as follows:
 
 ```clojure
-(hype/absolute-path-for routes :articles
+(hype/absolute-path-for router :articles
   {:query-params {:page 2
                   :per-page 10}
    :query-param-key-fn clojure.core/identity})
@@ -104,7 +117,7 @@ converted to camel case. This behaviour can be overridden as follows:
 Both path and query parameters can be provided together:
 
 ```clojure
-(hype/absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-params {:article-id 26}
    :query-params {:include-all-sections true}})
 ; => "/articles/26?includeAllSections=true"
@@ -113,7 +126,7 @@ Both path and query parameters can be provided together:
 When paths need to include query string template parameters:
 
 ```clojure
-(hype/absolute-path-for routes :articles
+(hype/absolute-path-for router :articles
   {:query-template-params [:page :per-page]})
 ; => "/articles{?page,perPage}"
 ```
@@ -122,7 +135,7 @@ Again, query template parameter keys are converted to camel case by default.
 This behaviour can be overridden as follows:
 
 ```clojure
-(hype/absolute-path-for routes :articles
+(hype/absolute-path-for router :articles
   {:query-template-params [:page :per-page]
    :query-template-param-key-fn clojure.core/identity})
 ; => "/articles{?page,per-page}"
@@ -132,7 +145,7 @@ Query string template parameters can be used in addition to path parameters
 and other query string parameters:
 
 ```clojure
-(hype/absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-params {:article-id 26}
    :query-params {:include-all-sections true}
    :query-template-params [:include-summary]})
@@ -143,7 +156,7 @@ Currently, there is no support for relative paths.
 
 ## <a name="generating-urls"></a> Generating URLs
 
-Given the set of routes defined in [Generating paths](#generating-paths) and
+Given one of the routers defined in [Generating paths](#generating-paths) and
 a `ring` `request` such as that produced by:
 
 ```clojure

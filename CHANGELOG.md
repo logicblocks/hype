@@ -8,10 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added support for `reitit` as a router, as well as extension points allowing
+  other routers to be supported, via the `hype.core/Backend` and
+  `hype.core/BackendFactory` protocols.
+
 ### Changed
 
 - Forked from b-social/hype.
 - All dependencies have been upgraded to the latest available versions.
+- All documentation has been updated and corrected.
+- `hype.core/base-url-for` has been renamed to `hype.core/base-url` since it
+  isn't really a factory based on parameters, instead it is a lookup of the
+  request.
 
 ## [1.0.0] — 2019-10-18
 

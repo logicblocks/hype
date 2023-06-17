@@ -29,64 +29,85 @@ Add the following to your `project.clj` file:
 `hype` includes built in backends for `bidi` and `reitit` and includes
 extension points allowing other routers to be supported.
 
-For example:
+### Examples
 
 ```clojure
 (require '[ring.mock.request :as ring-mock])
 (require '[hype.core :as hype])
+(require '[reitit.core :as reitit])
+(require '[bidi.bidi :as bidi])
 
 (def request (ring-mock/request "GET" "https://localhost:8080/help"))
-(def routes 
+
+;; general
+(hype/base-url request)
+; => "https://localhost:8080"
+
+(hype/absolute-path->absolute-url request "/articles/index.html")
+; => "https://localhost:8080/articles"
+
+;; reitit
+(def router
+  (reitit/router
+    [["/" :index]
+     ["/articles"
+      ["" :articles]
+      ["/:article-id"
+       ["" :article]
+       ["/sections/:section-id" :article-section]]]]))
+
+(reitit/routes router)
+
+;; or
+
+;; bidi
+(def router
   [""
    [["/" :index]
     ["/articles" :articles]
-    [["/articles/" :article-id] 
+    [["/articles/" :article-id]
      [["" :article]
-      [["/sections/" :article-section-id] :article-section]]]]])
+      [["/sections/" :section-id] :article-section]]]]])
 
-(hype/base-url-for request)
-; => "https://localhost:8080"
+;; then
 
-(absolute-path-for routes :index)
+(hype/absolute-path-for router :index)
 ; => "/"
 
-(absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-params {:article-id 10}})
 ; => "/articles/10"
 
-(absolute-path-for routes :article
+(hype/absolute-path-for router :article
   {:path-template-params {:article-id :article-id}})
 ; => "/articles/{articleId}"
 
-(absolute-path-for routes :article-index
-  {:query-params {:latest true
-                  :sort-direction "descending"}
+(hype/absolute-path-for router :articles
+  {:query-params          {:latest         true
+                           :sort-direction "descending"}
    :query-template-params [:per-page :page]})
 ; => "/articles?latest=true&sortDirection=descending{&perPage,page}"
 
-(absolute-url-for request routes :index)
+(hype/absolute-url-for request router :index)
 ; => "https://localhost:8080/"
 
-(absolute-url-for request routes :article
-  {:path-template-params {:article-id :articleID}
+(hype/absolute-url-for request router :article
+  {:path-template-params       {:article-id :articleID}
    :path-template-param-key-fn clojure.core/identity})
 ; => "https://localhost:8080/articles/{articleID}"
 
-(absolute-url-for request routes :article
-  {:path-params {:article-id 10}
+(hype/absolute-url-for request router :article
+  {:path-params           {:article-id 10}
    :query-template-params [:include-author :include-images]})
 ; => "https://localhost:8080/articles/10{?includeAuthor,includeImages}"
 
-(absolute-url-for request routes :article-index
-  {:query-params {:latest true
-                  :sort-direction "descending"}
-   :query-param-key-fn clojure.core/identity
-   :query-template-params [:per-page :page]
+(hype/absolute-url-for request router :articles
+  {:query-params                {:latest         true
+                                 :sort-direction "descending"}
+   :query-param-key-fn          clojure.core/identity
+   :query-template-params       [:per-page :page]
    :query-template-param-key-fn clojure.core/identity})
 ; => "https://localhost:8080/articles?latest=true&sort-direction=descending{&per-page,page}"
-
-(absolute-path->absolute-url request "/articles/index.html")
-; => "https://localhost:8080/articles"
 ```
 
 See the [Getting Started](https://logicblocks.github.io/hype/getting-started.html) 
