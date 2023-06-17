@@ -19,7 +19,7 @@
 
   :dependencies [[camel-snake-kebab "0.4.3"]
                  [bidi "2.1.6"]
-                 [metosin/reitit "0.6.0"]]
+                 [metosin/reitit-core "0.6.0"]]
 
   :profiles
   {:shared
