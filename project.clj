@@ -1,5 +1,5 @@
 (defproject io.logicblocks/hype "2.0.0-RC1"
-  :description "Hypermedia functions for bidi and ring."
+  :description "Hypermedia functions for ring routers."
   :url "https://github.com/logicblocks/hype"
 
   :license {:name "The MIT License"
