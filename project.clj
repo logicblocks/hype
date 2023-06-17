@@ -1,4 +1,4 @@
-(defproject io.logicblocks/hype "2.0.0-RC0"
+(defproject io.logicblocks/hype "2.0.0-RC1"
   :description "Hypermedia functions for bidi and ring."
   :url "https://github.com/logicblocks/hype"
 
