@@ -1,23 +1,26 @@
 (ns hype.core
-  "Hypermedia functions for `bidi` and `ring`.
+  "Hypermedia functions for `ring` routers.
 
   `hype` currently provides support for:
 
     - generating paths or URLs,
     - including template parameters, and
-    - converting between paths and URLs."
+    - converting between paths and URLs.
+
+  `hype` includes built in backends for `bidi` and `reitit` and includes
+  extension points allowing other routers to be supported."
   (:require
-    [clojure.string :as string]
+   [clojure.string :as string]
 
-    [bidi.bidi :as bidi]
-    [reitit.core :as reitit-core]
-    [reitit.impl :as reitit-impl]
+   [bidi.bidi :as bidi]
+   [reitit.core :as reitit-core]
+   [reitit.impl :as reitit-impl]
 
-    [ring.util.codec :as codec]
-    [camel-snake-kebab.core :as csk])
+   [ring.util.codec :as codec]
+   [camel-snake-kebab.core :as csk])
   (:import
-    [clojure.lang PersistentVector]
-    [reitit.core Router]))
+   [clojure.lang PersistentVector]
+   [reitit.core Router]))
 
 (defprotocol Backend
   (path-for [_ route-name parameters]))
@@ -102,12 +105,13 @@
   (str (base-url-for request) absolute-path))
 
 (defn absolute-path-for
-  "Builds an absolute path for `handler` based on `routes` and `params` where:
+  "Builds an absolute path for `route` based on `router` and `params` where:
 
-    - `routes` is a bidi routes data structure,
-    - `handler` is a keyword identifying the handler for which to build a path,
+    - `router` is a `reitit` router or a `bidia routes data structure,
+    - `route` is a keyword identifying the name of the route for which to build
+       a path,
     - `params` is an optional map which optionally includes any of:
-      - `path-params`: parameters defined in the bidi routes as route patterns,
+      - `path-params`: parameters defined in the routes as route patterns,
         specified as a map,
       - `path-template-params`: parameters that should remain templatable in
         the resulting path, specified as a map from path parameter name to
@@ -166,8 +170,8 @@
          :query-template-params [:per-page :page]
          :query-template-param-key-fn clojure.core/identity})
       ; => \"/articles/index.html?latest=true&sort-direction=descending{&per-page,page}\""
-  ([routes handler] (absolute-path-for routes handler {}))
-  ([routes-or-router handler
+  ([router route] (absolute-path-for router route {}))
+  ([router route
     {:keys [path-params
             path-template-params
             path-template-param-key-fn
@@ -184,7 +188,7 @@
             query-template-param-key-fn csk/->camelCaseString}
      :as   params}]
    (str
-     (path-for (backend-for routes-or-router) handler
+     (path-for (backend-for router) route
        (merge
          (path-template-params-for
            path-template-params
@@ -198,16 +202,15 @@
        {:expansion-character (if (empty? query-params) "?" "&")
         :key-fn              query-template-param-key-fn}))))
 
-(mapcat seq {:first 1 :second 2})
-
 (defn absolute-url-for
-  "Builds an absolute URL for `handler` based on `request`, `routes` and
+  "Builds an absolute URL for `route` based on `request`, `router` and
   `params` where:
 
-    - `handler` is a keyword identifying the handler for which to build a path,
-    - `routes` is a bidi routes data structure,
+    - `router` is a `reitit` router or a `bidi` routes data structure,
+    - `route` is a keyword identifying the name of the route for which to build
+       a path,
     - `params` is an optional map which optionally includes any of:
-      - `path-params`: parameters defined in the bidi routes as route patterns,
+      - `path-params`: parameters defined in the routes as route patterns,
         specified as a map,
       - `path-template-params`: parameters that should remain templatable in
         the resulting path, specified as a map from path parameter name to
@@ -269,7 +272,7 @@
          :query-template-params [:per-page :page]
          :query-template-param-key-fn clojure.core/identity})
       ; => \"https://localhost:8080/articles/index.html?latest=true&sort-direction=descending{&per-page,page}\""
-  ([request routes handler] (absolute-url-for request routes handler {}))
-  ([request routes handler params]
+  ([request router route] (absolute-url-for request router route {}))
+  ([request router route params]
    (absolute-path->absolute-url
-     request (absolute-path-for routes handler params))))
+     request (absolute-path-for router route params))))

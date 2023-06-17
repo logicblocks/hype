@@ -4,7 +4,7 @@
 [![Clojars Downloads](https://img.shields.io/clojars/dt/io.logicblocks/hype.svg)](https://clojars.org/io.logicblocks/hype)
 [![GitHub Contributors](https://img.shields.io/github/contributors-anon/logicblocks/hype.svg)](https://github.com/logicblocks/hype/graphs/contributors)
 
-Hypermedia functions for `bidi` and `ring`.
+Hypermedia functions for `ring` routers.
 
 ## Install
 
@@ -25,6 +25,9 @@ Add the following to your `project.clj` file:
 - generating paths or URLs,
 - including URI template parameters, and
 - converting between paths and URLs.
+
+`hype` includes built in backends for `bidi` and `reitit` and includes
+extension points allowing other routers to be supported.
 
 For example:
 

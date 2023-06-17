@@ -2,8 +2,9 @@
 
 `hype` provides a number of functions to assist in using hypermedia in APIs.
 Primarily, `hype` uses reverse routing to build URLs and paths. Currently, 
-`hype` expects `ring` compatible requests and provides support for the `bidi`
-routing library but could be extended to support others in the future. 
+`hype` expects `ring` compatible requests and provides support for the `reitit` 
+and `bidi` routing libraries with extension points allowing others to be
+supported. 
 
 `hype` can build absolute paths (i.e., paths that start from `/`) and
 absolute URLs (i.e., including scheme and host) and provides some facilities
