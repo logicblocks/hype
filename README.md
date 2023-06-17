@@ -11,7 +11,7 @@ Hypermedia functions for `ring` routers.
 Add the following to your `project.clj` file:
 
 ```clj
-[io.logicblocks/hype "1.1.0"]
+[io.logicblocks/hype "2.0.0"]
 ```
 
 ## Documentation

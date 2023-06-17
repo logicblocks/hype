@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.0] — 2023-06-17
+
 ### Added
 
 - Added support for `reitit` as a router, as well as extension points allowing
@@ -97,4 +99,5 @@ Released without _CHANGELOG.md_.
 
 [1.0.0]: https://github.com/b-social/hype/compare/0.0.21...1.0.0
 
-[Unreleased]: https://github.com/b-social/hype/compare/1.0.0...HEAD
+[2.0.0]: https://github.com/b-social/hype/compare/1.0.0...2.0.0
+[Unreleased]: https://github.com/b-social/hype/compare/2.0.0...HEAD
