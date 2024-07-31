@@ -1,4 +1,4 @@
-(defproject io.logicblocks/hype "2.0.1-RC4"
+(defproject io.logicblocks/hype "2.0.1-RC5"
   :description "Hypermedia functions for ring routers."
   :url "https://github.com/logicblocks/hype"
 
